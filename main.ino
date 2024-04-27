@@ -22,6 +22,8 @@
 #define HEX_COLOR_YELLOW             0xFFE0
 #define HEX_COLOR_GREY               0x8410
 
+#include "n_list.h"
+
 Adafruit_SSD1351 displ = Adafruit_SSD1351(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, CS_PIN, DC_PIN, RESET_PIN);
 float angle = 0;
 
@@ -41,13 +43,6 @@ vec4 vec4::create(float x, float y, float z, float w) {
 
     return vec;
 }
-
-
-
-
-
-
-
 
 class vec3 {
 public:
@@ -175,23 +170,27 @@ matrix4 lookat(vec3 eye, vec3 target, vec3 up) {
 
     return matrix4::create(row1, row2, row3, row4);
 }
+matrix4 rotate(vec3 rotation) {
+
+
+}
 
 matrix4 projection = perspective(1.f, 45.f, 1000.1f, 1.f);
-matrix4 position = lookat(vec3::create(0, 0, -2), vec3::create(0, 0, 0), vec3::create(0, 1, 0));
+matrix4 position = lookat(vec3::create(0, 50, -10), vec3::create(0, 0, 0), vec3::create(0, 1, 0));
 
 
 
-vec3 t1 = vec3::create(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0);
-vec3 t2 = vec3::create(SCREEN_WIDTH/2 + 50, SCREEN_HEIGHT/2 - 50, 0);
-vec3 t3 = vec3::create(SCREEN_WIDTH/2 - 50, SCREEN_HEIGHT/2 - 50, 0);
-
+vec3 t1 = vec3::create(SCREEN_WIDTH/2 - 70, SCREEN_HEIGHT/2, 0);
+vec3 t2 = vec3::create(SCREEN_WIDTH/2 + 50 - 70, SCREEN_HEIGHT/2 - 50, 0);
+vec3 t3 = vec3::create(SCREEN_WIDTH/2 - 50 - 70, SCREEN_HEIGHT/2 - 50, 0);
+vec3 t4 = vec3::create(SCREEN_WIDTH/2 - 70, SCREEN_HEIGHT/2 - 50, 70);
 
 
 vec3 toScreenSpace(vec4 coordinate) {
     float x = ((coordinate.x + 1)/2.f) * SCREEN_WIDTH;
     float y = ((coordinate.y + 1)/2.f) * SCREEN_HEIGHT;
 
-    return vec3::create(coordinate.x, coordinate.y, 0);
+    return vec3::create(coordinate.x + SCREEN_WIDTH/2, coordinate.y, 0);
 }
 
 
@@ -202,7 +201,7 @@ void setup() {
 }
 
 void loop() {
-    angle += 0.1f;
+    angle += 0.05f;
 
     position = lookat(vec3::create(100 * sin(angle), 10, 100 * cos(angle)), vec3::create(0, 0, 0), vec3::create(0, 1, 0));
 
@@ -218,8 +217,13 @@ void loop() {
     vec3 translatedTriangle1 = toScreenSpace(matrix4::mult(matrix4::mult(projection, position), vec4::create(t1.x, t1.y, t1.z, 1)));
     vec3 translatedTriangle2 = toScreenSpace(matrix4::mult(matrix4::mult(projection, position), vec4::create(t2.x, t2.y, t2.z, 1)));
     vec3 translatedTriangle3 = toScreenSpace(matrix4::mult(matrix4::mult(projection, position), vec4::create(t3.x, t3.y, t3.z, 1)));
+    vec3 translatedTriangle4 = toScreenSpace(matrix4::mult(matrix4::mult(projection, position), vec4::create(t4.x, t4.y, t4.z, 1)));
 
     displ.drawLine(translatedTriangle1.x, translatedTriangle1.y, translatedTriangle2.x, translatedTriangle2.y, HEX_COLOR_RED);
     displ.drawLine(translatedTriangle3.x, translatedTriangle3.y, translatedTriangle2.x, translatedTriangle2.y, HEX_COLOR_GREEN);
     displ.drawLine(translatedTriangle3.x, translatedTriangle3.y, translatedTriangle1.x, translatedTriangle1.y, HEX_COLOR_BLUE);
+
+    displ.drawLine(translatedTriangle4.x, translatedTriangle4.y, translatedTriangle1.x, translatedTriangle1.y, HEX_COLOR_MAGENTA);
+    displ.drawLine(translatedTriangle4.x, translatedTriangle4.y, translatedTriangle2.x, translatedTriangle2.y, HEX_COLOR_MAGENTA);
+    displ.drawLine(translatedTriangle4.x, translatedTriangle4.y, translatedTriangle3.x, translatedTriangle3.y, HEX_COLOR_MAGENTA);
 }
